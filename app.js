@@ -35,6 +35,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// default route
+app.get('/', (req, res) => {
+    res.json({"message": "Welcome to Bookzone Product app"});
+});
+
 // Routes which should handle requests
 app.use("/products", productRoutes);
 app.use("/orders", orderRoutes);
