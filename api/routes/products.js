@@ -12,9 +12,9 @@ cloudinary.config({
 });
 
 const storage = cloudinaryStorage({
-cloudinary: cloudinary,
-folder: "demo",
-allowedFormats: ["jpg", "png"]
+    cloudinary: cloudinary,
+    folder: "demo",
+    allowedFormats: ["jpg", "png"]
 });
 
 
@@ -58,6 +58,96 @@ router.get("/", (req, res, next) => {
     });
 });
 
+router.get("/short", (req, res, next) => {
+  Product.find().limit(10).sort({ "name" : 1 })
+    .select("name price _id productImage")
+    .exec()
+    .then(docs => {
+      const response = {
+        count: docs.length,
+        products: docs.map(doc => {
+          return {
+            name: doc.name,
+            price: doc.price,
+            productImage: doc.productImage,
+            _id: doc._id,
+            request: {
+              type: "GET",
+              url: "http://localhost:3000/products/" + doc._id
+            }
+          };
+        })
+      };
+      //   if (docs.length >= 0) {
+      res.status(200).json(response);
+      //   } else {
+      //       res.status(404).json({
+      //           message: 'No entries found'
+      //       });
+      //   }
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: err
+      });
+    });
+});
+
+router.get("/new", (req, res, next) => {
+  Product.find().limit(10).sort({ "createdAt" : -1 })
+    .select("name price _id productImage")
+    .exec()
+    .then(docs => {
+      const response = {
+        count: docs.length,
+        products: docs.map(doc => {
+          return {
+            name: doc.name,
+            price: doc.price,
+            productImage: doc.productImage,
+            _id: doc._id,
+            request: {
+              type: "GET",
+              url: "http://localhost:3000/products/" + doc._id
+            }
+          };
+        })
+      };
+      //   if (docs.length >= 0) {
+      res.status(200).json(response);
+      //   } else {
+      //       res.status(404).json({
+      //           message: 'No entries found'
+      //       });
+      //   }
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: err
+      });
+    });
+});
+
+
+
+// router.get("/", (req, res, next) => {
+
+//     Product.find()
+//     .then(products => {
+//         res.send(products);
+//     }).catch(err => {
+//         res.status(500).send({
+//             message: err.message || "Something wrong while retrieving products."
+//         });
+//     }); 
+
+// });
+
+
+
+
 router.post("/", upload.single('productImage'), (req, res, next) => {
   console.log(req.file)
   const product = new Product({
@@ -76,6 +166,8 @@ router.post("/", upload.single('productImage'), (req, res, next) => {
             name: result.name,
             price: result.price,
             _id: result._id,
+            createdAt: result.createdAt,
+            updatedAt: result.updatedAt,
             request: {
                 type: 'GET',
                 url: "http://localhost:3000/products/" + result._id
